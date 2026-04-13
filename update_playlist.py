@@ -23,6 +23,7 @@ FEEDS = {
     "ABC_NEWS_DAILY":  {"id": "1D4A4NKKF0axPvAS7h31Lu", "lookback": 2}, 
     "SQUIZ":           {"id": "0B7f89Byi1DjBTIQH4h0t2", "lookback": 2}, 
     "SEVEN_AM":        {"id": "7A58JjoBja1ykDVvZPSEXC", "lookback": 2}, 
+    "KOHLER_POD":      {"id": "4rEvblIzyDs6WqH6mfH6lL", "lookback": 2},
 }
 
 # --- BACKUP POOLS ---
@@ -227,7 +228,11 @@ def update_daily_drive():
         add_songs(4)
         final_uris.append(get_best_episode("SQUIZ", backups=MEDIUM_BACKUPS_POOL1))
         add_songs(4)
-        final_uris.append(get_best_episode("SEVEN_AM", backups=MEDIUM_BACKUPS_POOL2))
+        if current_day == 4:
+            log_event("FRIDAY MODE: It's Kohler time.")
+            final_uris.append(get_best_episode("KOHLER_POD", backups=[FEEDS["SEVEN_AM"]["id"]])) # If Friday, then Alan Kohler time.
+        else:
+            final_uris.append(get_best_episode("SEVEN_AM", backups=MEDIUM_BACKUPS_POOL2))
         add_songs(4)
 
     final_uris = [uri for uri in final_uris if uri]
