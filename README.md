@@ -15,8 +15,8 @@ This script gives you full control over the "weave" of your morning. It mixes yo
 ## 📁 Project Structure
 ```text
 .
-├── update_playlist.py   # Main Python script
 ├── .env                 # API Credentials and Playlist IDs (Secret)
 ├── .venv/               # Python Virtual Environment
 ├── logs/                # Generated execution logs
-└── run_daily_drive.bat  # Launcher for Windows Task Scheduler
+├── helper_functions/    # Helper functions and scripts
+└── update_playlist.py   # Main Python script
