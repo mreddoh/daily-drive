@@ -1,0 +1,21 @@
+# --- CREDENTIALS ---
+.env
+.env.local
+.cache
+
+# --- PYTHON JUNK ---
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+ENV/
+.venv/
+.pytest_cache/
+
+# --- PROJECT SPECIFIC ---
+logs/
+*.log
+
+# --- OS SPECIFIC ---
+.DS_Store
+Thumbs.db
