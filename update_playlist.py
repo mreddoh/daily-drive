@@ -130,7 +130,7 @@ def get_best_episode(feed_name, backups=None):
         log_event(f"ERR: {feed_name} | {e}")
         return None
     
-def get_weekend_episodes(show_ids, lookback_limit=5, select_count=3):
+def get_weekend_episodes(show_ids, lookback_limit, select_count):
     """Looks for podcasts that update on the weekend or can be listened to one the weekend. Use an 'x' most recent to find podcast."""
     candidate_uris = []
 
@@ -210,7 +210,7 @@ def update_daily_drive():
     final_uris = []
 
     if is_weekend:
-        weekend_picks = get_weekend_episodes(WEEKEND_PODCASTS, lookback_limit=3, select_count=3)
+        weekend_picks = get_weekend_episodes(WEEKEND_PODCASTS, lookback_limit=5, select_count=3)
 
         # --- WEAVING ---
         final_uris.append(get_best_episode("ABC_TOP_STORIES"))
