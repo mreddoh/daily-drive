@@ -188,8 +188,8 @@ def update_daily_drive():
     all_new = get_everything_from_playlist(NEW_PLAYLIST_ID)
 
     # Now you have true statistical randomness across the entire population
-    n_new = 5
-    n_old = 7
+    n_new = 6
+    n_old = 8
 
     music_new = random.sample(all_new, n_new)
     music_ever = random.sample(all_evergreen, n_old)
@@ -214,6 +214,7 @@ def update_daily_drive():
 
         # --- WEAVING ---
         final_uris.append(get_best_episode("ABC_TOP_STORIES"))
+        add_songs(2)
         final_uris.append(weekend_picks[0])
         add_songs(4)
         final_uris.append(weekend_picks[1])
@@ -224,6 +225,7 @@ def update_daily_drive():
     else:
         # --- WEAVING ---
         final_uris.append(get_best_episode("ABC_TOP_STORIES"))
+        add_songs(2)
         final_uris.append(get_best_episode("ABC_NEWS_DAILY", backups=SHORT_BACKUPS))
         add_songs(4)
         final_uris.append(get_best_episode("SQUIZ", backups=MEDIUM_BACKUPS_POOL1))
