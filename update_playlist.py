@@ -5,6 +5,7 @@ import random
 from datetime import datetime, timezone, timedelta
 from zoneinfo import ZoneInfo
 import os
+import json
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -56,6 +57,17 @@ WEEKEND_PODCASTS = [
     '2VRS1IJCTn2Nlkg33ZVfkM',  # 99% Invisible
 ]
 
+WEEKEND_PODCASTS_POOL1 = [
+    '2hmkzUtix0qTqvtpPcMzEL',  # Radiolab
+    '51CN011CgUdG7EUfm7cXF7',  # Reveal
+]
+
+WEEKEND_PODCASTS_POOL2 = [
+    '0jG1HXr3tGoGorW1ieytRS',  # The Audio Long Read (The Guardian)
+    '0PhoePNItwrXBnmAEZgYmt',  # Unexplainable (Vox)
+    '2VRS1IJCTn2Nlkg33ZVfkM',  # 99% Invisible
+]
+
 # Authentication
 CLIENT_ID = os.getenv('SPOTIPY_CLIENT_ID')
 CLIENT_SECRET = os.getenv('SPOTIPY_CLIENT_SECRET')
@@ -76,14 +88,20 @@ if not os.path.exists(LOG_DIR):
 
 # --- LOG FILENAME LOGIC ---
 NOW_MELB = datetime.now(ZoneInfo("Australia/Melbourne"))
-base_filename = NOW_MELB.strftime("daily_drive_%Y-%m-%d_%H-%M.log")
+log_time = NOW_MELB.strftime("%Y-%m-%d_%H-%M")
+
+base_filename = f"daily_drive_{log_time}.log"
+json_filename = f"daily_drive_{log_time}.json"
 
 if DRY_RUN:
     LOG_FILENAME = f"test_{base_filename}"
+    JSON_FILENAME = f"test_{json_filename}"
 else:
     LOG_FILENAME = base_filename
+    JSON_FILENAME = json_filename
 
 LOG_PATH = os.path.join(LOG_DIR, LOG_FILENAME)
+JSON_PATH = os.path.join(LOG_DIR, JSON_FILENAME)
 
 
 # --- CHECK FOR WEEKEND ---
@@ -210,7 +228,11 @@ def update_daily_drive():
     final_uris = []
 
     if is_weekend:
-        weekend_picks = get_weekend_episodes(WEEKEND_PODCASTS, lookback_limit=5, select_count=3)
+
+        if current_day == 5:
+            weekend_picks = get_weekend_episodes(WEEKEND_PODCASTS_POOL1, lookback_limit=5, select_count=2)
+        else:
+            weekend_picks = get_weekend_episodes(WEEKEND_PODCASTS_POOL2, lookback_limit=5, select_count=3)
 
         # --- WEAVING ---
         final_uris.append(get_best_episode("ABC_TOP_STORIES"))
@@ -219,11 +241,11 @@ def update_daily_drive():
             log_event("SATURDAY MODE: It's Kohler time.")
             final_uris.append(get_best_episode("KOHLER_POD")) # If Saturday (Podcast is loaded at 3pm on a Friday), then Alan Kohler time.
         else:
-            final_uris.append(weekend_picks[0])
+            final_uris.append(weekend_picks[2]) # Needs to be last, as the two arrays will be different sizes.
+        add_songs(4)
+        final_uris.append(weekend_picks[0])
         add_songs(4)
         final_uris.append(weekend_picks[1])
-        add_songs(4)
-        final_uris.append(weekend_picks[2])
         add_songs(4)
 
     else:
@@ -261,7 +283,11 @@ def update_daily_drive():
             except Exception:
                 log_event(f"  [{i:02d}] Could not resolve {uri}")
 
-        print(f"Finished. Daily Drive complete. Check {LOG_PATH} for the results.")
+        # Save the flat JSON (The "Machine" Log)
+        with open(JSON_PATH, 'w') as f:
+            json.dump(final_uris, f)
+
+        print(f"Finished. Daily Drive complete. Check {LOG_PATH} & {JSON_PATH} for the results.")
     else:
         log_event("FAILURE: No items found.")
 
