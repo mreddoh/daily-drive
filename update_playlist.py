@@ -17,7 +17,7 @@ DAILY_DRIVE = os.getenv('TARGET_PLAYLIST_ID')
 NEW_PLAYLIST_ID = os.getenv('NEW_MUSIC_PLAYLIST_ID')
 EVERGREEN_PLAYLIST_ID = os.getenv('EVERGREEN_PLAYLIST_ID')
 
-# Primary Show IDs
+# Primary Show IDs - I should probably have all these in a separate file, just need to think of the best way to do that...
 # lookback: 1 = Today only | 2 = Today or Yesterday
 FEEDS = {
     "ABC_TOP_STORIES": {"id": "75ruL1B21lO7NXqvgdfn1Q", "lookback": 4}, 
@@ -37,7 +37,7 @@ SHORT_BACKUPS = [
 
 # MEDIUM_BACKUPS: Deeper dives or daily explainers (~10-25 mins)
 MEDIUM_BACKUPS_POOL1 = [
-#    '3Z6JdCS2d0eFEpXHKI6WqH',  # Consider This (NPR)
+    '1v0tWOA2mdi5WU9hvjJ3da',  # The Morning Edition (Fairfax)
     '77nIoFcQZSzcQap4Pnj9xD',  # The Briefing
     '7GJod4EyoLywB1AW6zrSHh',  # Full Story (The Guardian)
 ]
