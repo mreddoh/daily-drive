@@ -7,11 +7,12 @@ from zoneinfo import ZoneInfo
 import os
 import json
 from dotenv import load_dotenv
+from collections import Counter
 
 load_dotenv()
 
 # Configuration
-DRY_RUN = False  # Set to True to only produce log and not update playlist
+DRY_RUN = True  # Set to True to only produce log and not update playlist
 
 DAILY_DRIVE = os.getenv('TARGET_PLAYLIST_ID')
 NEW_PLAYLIST_ID = os.getenv('NEW_MUSIC_PLAYLIST_ID')
@@ -200,10 +201,42 @@ def get_everything_from_playlist(playlist_id):
 
 def update_daily_drive():
     mode_label = "DRY RUN (No Playlist Update)" if DRY_RUN else "FOR REAL (Updating Spotify)"
+
+    log_event(f"--- CHECKING HISTORICAL PLAYS ---")
+
+    # 1. SETUP PARAMETERS
+    days_n = 7
+    threshold_x = 3
+    
+    cutoff_time = (datetime.now() - timedelta(days=days_n)).timestamp()
+
+    # 2. INGEST LOGS
+    try:
+        all_played_uris = []
+        for filename in os.listdir(LOG_DIR):
+            # Manually filter for .json files
+            if filename.endswith(".json"):
+                # Join directory and filename to get the full path
+                file_path = os.path.join(LOG_DIR, filename)
+                
+                if os.path.getmtime(file_path) >= cutoff_time:
+                    with open(file_path, 'r') as f:
+                        all_played_uris.extend(json.load(f))
+        
+        counts = Counter(all_played_uris)
+        excluded = {uri for uri, count in counts.items() if count >= threshold_x}
+
+    except:
+        excluded = set()
+
+
     log_event(f"--- STARTING PLAYLIST GENERATION | {mode_label} ---")
     
     all_evergreen = get_everything_from_playlist(EVERGREEN_PLAYLIST_ID)
     all_new = get_everything_from_playlist(NEW_PLAYLIST_ID)
+
+    all_evergreen = [uri for uri in all_evergreen if uri not in excluded]
+    all_new = [uri for uri in all_new if uri not in excluded]
 
     # Now you have true statistical randomness across the entire population
     n_new = 6
