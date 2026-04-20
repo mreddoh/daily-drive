@@ -49,15 +49,7 @@ MEDIUM_BACKUPS_POOL2 = [
     '4jULwMxzuP6sipQL6ggMEo',  # Hack
 ]
 
-
-WEEKEND_PODCASTS = [
-    '2hmkzUtix0qTqvtpPcMzEL',  # Radiolab
-    '51CN011CgUdG7EUfm7cXF7',  # Reveal
-    '0jG1HXr3tGoGorW1ieytRS',  # The Audio Long Read (The Guardian)
-    '0PhoePNItwrXBnmAEZgYmt',  # Unexplainable (Vox)
-    '2VRS1IJCTn2Nlkg33ZVfkM',  # 99% Invisible
-]
-
+# WEEKEND_PODCASTS: Deeper dives or non-daily explainers (~10-25 mins)
 WEEKEND_PODCASTS_POOL1 = [
     '2hmkzUtix0qTqvtpPcMzEL',  # Radiolab
     '51CN011CgUdG7EUfm7cXF7',  # Reveal
@@ -207,7 +199,7 @@ def update_daily_drive():
     # 1. SETUP PARAMETERS
     days_n = 7
     threshold_x = 3
-    
+
     cutoff_time = (datetime.now() - timedelta(days=days_n)).timestamp()
 
     # 2. INGEST LOGS
@@ -224,19 +216,21 @@ def update_daily_drive():
                         all_played_uris.extend(json.load(f))
         
         counts = Counter(all_played_uris)
-        excluded = {uri for uri, count in counts.items() if count >= threshold_x}
+        excluded = {uri for uri, count in counts.items() if count >= threshold_x and "episode" not in uri}
 
     except:
         excluded = set()
 
+    if excluded:
+        log_event(f"OVERPLAYED SONGS FOUND: {len(excluded)} {'song' if len(excluded) == 1 else 'songs'} excluded...")
 
     log_event(f"--- STARTING PLAYLIST GENERATION | {mode_label} ---")
     
     all_evergreen = get_everything_from_playlist(EVERGREEN_PLAYLIST_ID)
     all_new = get_everything_from_playlist(NEW_PLAYLIST_ID)
 
-    all_evergreen = [uri for uri in all_evergreen if uri not in excluded]
-    all_new = [uri for uri in all_new if uri not in excluded]
+    all_evergreen = [item for item in all_evergreen if item.get('item', {}).get('uri') not in excluded]
+    all_new = [item for item in all_new if item.get('item', {}).get('uri') not in excluded]
 
     # Now you have true statistical randomness across the entire population
     n_new = 6
