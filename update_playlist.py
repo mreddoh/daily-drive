@@ -2,7 +2,7 @@
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import random
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 import os
 import json
@@ -49,7 +49,7 @@ MEDIUM_BACKUPS_POOL2 = [
     '4jULwMxzuP6sipQL6ggMEo',  # Hack
 ]
 
-# WEEKEND_PODCASTS: Deeper dives or non-daily explainers (~10-25 mins)
+# WEEKEND_PODCASTS: Non-daily podcasts on various subjects, one-offs (~10-25 mins)
 WEEKEND_PODCASTS_POOL1 = [
     '2hmkzUtix0qTqvtpPcMzEL',  # Radiolab
     '51CN011CgUdG7EUfm7cXF7',  # Reveal
@@ -76,25 +76,15 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=CLIENT_ID,
 
 # --- LOGGING SETUP ---
 LOG_DIR = "logs"
-if not os.path.exists(LOG_DIR):
-    os.makedirs(LOG_DIR)
+os.makedirs(LOG_DIR, exist_ok=True)
 
 # --- LOG FILENAME LOGIC ---
 NOW_MELB = datetime.now(ZoneInfo("Australia/Melbourne"))
 log_time = NOW_MELB.strftime("%Y-%m-%d_%H-%M")
 
-base_filename = f"daily_drive_{log_time}.log"
-json_filename = f"daily_drive_{log_time}.json"
-
-if DRY_RUN:
-    LOG_FILENAME = f"test_{base_filename}"
-    JSON_FILENAME = f"test_{json_filename}"
-else:
-    LOG_FILENAME = base_filename
-    JSON_FILENAME = json_filename
-
-LOG_PATH = os.path.join(LOG_DIR, LOG_FILENAME)
-JSON_PATH = os.path.join(LOG_DIR, JSON_FILENAME)
+prefix = "test_" if DRY_RUN else ""
+LOG_PATH = os.path.join(LOG_DIR, f"{prefix}daily_drive_{log_time}.log")
+JSON_PATH = os.path.join(LOG_DIR, f"{prefix}daily_drive_{log_time}.json")
 
 
 # --- CHECK FOR WEEKEND ---
@@ -170,10 +160,9 @@ def get_weekend_episodes(show_ids, lookback_limit, select_count):
     # --- LOGGING THE NAMES ---
     log_event(f"WEEKEND GEN: Final Selection ({len(selected_items)} episodes):")
     for item in selected_items:
-        # Now item['name'] works because 'item' is the dictionary from Spotify
         log_event(f"  >> SELECTED: {item['name']}")
     
-    # Return ONLY the URIs to the weave so the rest of your script doesn't break
+    # Return ONLY the URIs
     return [item['uri'] for item in selected_items]
 
 def get_everything_from_playlist(playlist_id):
@@ -218,7 +207,8 @@ def update_daily_drive():
         counts = Counter(all_played_uris)
         excluded = {uri for uri, count in counts.items() if count >= threshold_x and "episode" not in uri}
 
-    except:
+    except Exception as e:
+        log_event(f"ERR: Could not load history | {e}")
         excluded = set()
 
     if excluded:
@@ -232,17 +222,12 @@ def update_daily_drive():
     all_evergreen = [item for item in all_evergreen if item.get('item', {}).get('uri') not in excluded]
     all_new = [item for item in all_new if item.get('item', {}).get('uri') not in excluded]
 
-    # Now you have true statistical randomness across the entire population
     n_new = 6
     n_old = 8
-
-    music_new = random.sample(all_new, n_new)
-    music_ever = random.sample(all_evergreen, n_old)
     
-    s_pool = random.sample(music_new, n_new) + random.sample(music_ever, n_old)
+    s_pool = random.sample(all_new, min(n_new, len(all_new)))
+    s_pool += random.sample(all_evergreen, min(n_old, len(all_evergreen)))
     random.shuffle(s_pool)
-
-    final_uris = []
 
     def add_songs(count):
         for _ in range(count):
@@ -268,7 +253,8 @@ def update_daily_drive():
             log_event("SATURDAY MODE: It's Kohler time.")
             final_uris.append(get_best_episode("KOHLER_POD")) # If Saturday (Podcast is loaded at 3pm on a Friday), then Alan Kohler time.
         else:
-            final_uris.append(weekend_picks[2]) # Needs to be last, as the two arrays will be different sizes.
+            if len(weekend_picks) > 2:
+                final_uris.append(weekend_picks[2]) # Needs to be last, as the two arrays will be different sizes.
         add_songs(4)
         final_uris.append(weekend_picks[0])
         add_songs(4)
