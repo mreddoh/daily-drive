@@ -12,7 +12,7 @@ from collections import Counter
 load_dotenv()
 
 # Configuration
-DRY_RUN = True  # Set to True to only produce log and not update playlist
+DRY_RUN = False  # Set to True to only produce log and not update playlist
 
 DAILY_DRIVE = os.getenv('TARGET_PLAYLIST_ID')
 NEW_PLAYLIST_ID = os.getenv('NEW_MUSIC_PLAYLIST_ID')
@@ -21,11 +21,17 @@ EVERGREEN_PLAYLIST_ID = os.getenv('EVERGREEN_PLAYLIST_ID')
 # Primary Show IDs - I should probably have all these in a separate file, just need to think of the best way to do that...
 # lookback: 1 = Today only | 2 = Today or Yesterday
 FEEDS = {
-    "ABC_TOP_STORIES": {"id": "75ruL1B21lO7NXqvgdfn1Q", "lookback": 4}, 
-    "ABC_NEWS_DAILY":  {"id": "1D4A4NKKF0axPvAS7h31Lu", "lookback": 2}, 
-    "SQUIZ":           {"id": "0B7f89Byi1DjBTIQH4h0t2", "lookback": 2}, 
-    "SEVEN_AM":        {"id": "7A58JjoBja1ykDVvZPSEXC", "lookback": 2}, 
-    "KOHLER_POD":      {"id": "4rEvblIzyDs6WqH6mfH6lL", "lookback": 2},
+    "ABC_TOP_STORIES":      {"id": "75ruL1B21lO7NXqvgdfn1Q", "lookback": 4}, 
+    "ABC_NEWS_DAILY":       {"id": "1D4A4NKKF0axPvAS7h31Lu", "lookback": 2}, 
+    "SQUIZ":                {"id": "0B7f89Byi1DjBTIQH4h0t2", "lookback": 2}, 
+    "SEVEN_AM":             {"id": "7A58JjoBja1ykDVvZPSEXC", "lookback": 2}, 
+    "KOHLER_POD":           {"id": "4rEvblIzyDs6WqH6mfH6lL", "lookback": 2},
+    # WEEKEND
+    "AUSTRALIAN_POLITICS":  {"id": "1SupKqvqcIeXzYrDyfS79Z", "lookback": 7},
+    "NEWS_CLUB":            {"id": "1ANvW9TAd2mg2rrHw7pQDv", "lookback": 7},
+    "THE_FIN":              {"id": "4SB87MDqJXOSDr4mtaP28k", "lookback": 7},
+    "SAMI_SHAH":            {"id": "68XGIbKNj1DZGEYL2eLfWL", "lookback": 7},
+    "POLITICS_WEEKLY":      {"id": "1iBVIJyVTq8RGw3HFz4b3v", "lookback": 7},
 }
 
 # --- BACKUP POOLS ---
@@ -46,18 +52,21 @@ MEDIUM_BACKUPS_POOL1 = [
 MEDIUM_BACKUPS_POOL2 = [
     '03arfcmwJRUVPGcOZRQJOx',  # SBS News In Depth
     '2D1BdnaZU3kB6KK8IF0RVW',  # Politics Now (ABC)
-    '4jULwMxzuP6sipQL6ggMEo',  # Hack
+    '2cSQmzYnf6LyrN0Mi6E64p',  # Today In Focus (The Guardian)
 ]
 
-# WEEKEND_PODCASTS: Non-daily podcasts on various subjects, one-offs (~10-25 mins)
-WEEKEND_PODCASTS_POOL1 = [
+# WEEKEND_BACKUPS: Non-daily podcasts on various subjects, one-offs (~10-25 mins)
+WEEKEND_BACKUPS_POOL1 = [
     '2hmkzUtix0qTqvtpPcMzEL',  # Radiolab
     '51CN011CgUdG7EUfm7cXF7',  # Reveal
 ]
 
-WEEKEND_PODCASTS_POOL2 = [
+WEEKEND_BACKUPS_POOL2 = [
     '0jG1HXr3tGoGorW1ieytRS',  # The Audio Long Read (The Guardian)
     '0PhoePNItwrXBnmAEZgYmt',  # Unexplainable (Vox)
+]
+
+WEEKEND_BACKUPS_POOL3 = [
     '2VRS1IJCTn2Nlkg33ZVfkM',  # 99% Invisible
 ]
 
@@ -130,40 +139,6 @@ def get_best_episode(feed_name, backups=None):
     except Exception as e:
         log_event(f"ERR: {feed_name} | {e}")
         return None
-    
-def get_weekend_episodes(show_ids, lookback_limit, select_count):
-    """Looks for podcasts that update on the weekend or can be listened to one the weekend. Use an 'x' most recent to find podcast."""
-    candidate_uris = []
-
-    log_event(f"WEEKEND GEN: Scanning {len(show_ids)} shows for candidates (lookback: {lookback_limit})...")
-
-    for show_id in show_ids:
-        try:
-            # Fetch the most recent episodes for this specific show
-            results = sp.show_episodes(show_id, limit=lookback_limit, market='AU')
-            episodes = results.get('items', [])
-            
-            if episodes:
-                # Pick ONE random episode from the lookback window
-                chosen_ep = random.choice(episodes)
-                candidate_uris.append(chosen_ep)
-                
-        except Exception as e:
-            log_event(f"ERR: Could not fetch random ep for {show_id} | {e}")
-
-    # Final step: Choose the random sample from our pool of objects
-    if len(candidate_uris) >= select_count:
-        selected_items = random.sample(candidate_uris, select_count)
-    else:
-        selected_items = candidate_uris
-
-    # --- LOGGING THE NAMES ---
-    log_event(f"WEEKEND GEN: Final Selection ({len(selected_items)} episodes):")
-    for item in selected_items:
-        log_event(f"  >> SELECTED: {item['name']}")
-    
-    # Return ONLY the URIs
-    return [item['uri'] for item in selected_items]
 
 def get_everything_from_playlist(playlist_id):
     """Iterates through the entire playlist to pull every single track URI."""
@@ -241,25 +216,24 @@ def update_daily_drive():
 
     if is_weekend:
 
-        if current_day == 5:
-            weekend_picks = get_weekend_episodes(WEEKEND_PODCASTS_POOL1, lookback_limit=5, select_count=2)
-        else:
-            weekend_picks = get_weekend_episodes(WEEKEND_PODCASTS_POOL2, lookback_limit=5, select_count=3)
-
         # --- WEAVING ---
         final_uris.append(get_best_episode("ABC_TOP_STORIES"))
         add_songs(2)
         if current_day == 5:
             log_event("SATURDAY MODE: It's Kohler time.")
-            final_uris.append(get_best_episode("KOHLER_POD")) # If Saturday (Podcast is loaded at 3pm on a Friday), then Alan Kohler time.
+            final_uris.append(get_best_episode("KOHLER_POD"), backups=WEEKEND_BACKUPS_POOL3) # If Saturday (Podcast is loaded at 3pm on a Friday), then Alan Kohler time.
+            add_songs(4)
+            final_uris.append(get_best_episode("NEWS_CLUB", backups=WEEKEND_BACKUPS_POOL1))
+            add_songs(4)
+            final_uris.append(get_best_episode("POLITICS_WEEKLY", backups=WEEKEND_BACKUPS_POOL2))
+            add_songs(4)
         else:
-            if len(weekend_picks) > 2:
-                final_uris.append(weekend_picks[2]) # Needs to be last, as the two arrays will be different sizes.
-        add_songs(4)
-        final_uris.append(weekend_picks[0])
-        add_songs(4)
-        final_uris.append(weekend_picks[1])
-        add_songs(4)
+            final_uris.append(get_best_episode("AUSTRALIAN_POLITICS", backups=WEEKEND_BACKUPS_POOL3))
+            add_songs(4)
+            final_uris.append(get_best_episode("THE_FIN", backups=WEEKEND_BACKUPS_POOL1))
+            add_songs(4)
+            final_uris.append(get_best_episode("SAMI_SHAH", backups=WEEKEND_BACKUPS_POOL2))
+            add_songs(4)
 
     else:
         # --- WEAVING ---
