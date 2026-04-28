@@ -23,10 +23,12 @@ EVERGREEN_PLAYLIST_ID = os.getenv('EVERGREEN_PLAYLIST_ID')  # Source: all-time f
 # Each feed has a Spotify show ID and a lookback window (in days).
 # lookback: 1 = today only | 2 = today or yesterday | 7 = anything this week
 FEEDS = {
-    "ABC_TOP_STORIES":      {"id": "75ruL1B21lO7NXqvgdfn1Q", "lookback": 4}, 
-    "ABC_NEWS_DAILY":       {"id": "1D4A4NKKF0axPvAS7h31Lu", "lookback": 2}, 
-    "SQUIZ":                {"id": "0B7f89Byi1DjBTIQH4h0t2", "lookback": 2}, 
-    "SEVEN_AM":             {"id": "7A58JjoBja1ykDVvZPSEXC", "lookback": 2}, 
+    # EVERYDAY
+    "ABC_TOP_STORIES":      {"id": "75ruL1B21lO7NXqvgdfn1Q", "lookback": 4},
+    # WEEKDAY
+    "ABC_NEWS_DAILY":       {"id": "1D4A4NKKF0axPvAS7h31Lu", "lookback": 2},
+    "SQUIZ":                {"id": "0B7f89Byi1DjBTIQH4h0t2", "lookback": 2},
+    "SEVEN_AM":             {"id": "7A58JjoBja1ykDVvZPSEXC", "lookback": 2},
     # WEEKEND
     "KOHLER_POD":           {"id": "4rEvblIzyDs6WqH6mfH6lL", "lookback": 2},
     "AUSTRALIAN_POLITICS":  {"id": "1SupKqvqcIeXzYrDyfS79Z", "lookback": 7},
