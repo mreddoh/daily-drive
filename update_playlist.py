@@ -60,7 +60,7 @@ SATURDAY_BACKUPS = [
 SUNDAY_BACKUPS = [
     '4FYpq3lSeQMAhqNI81O0Cn',  # Planet Money
     '44D2RrEWMQMv9jAVDeGmuU',  # World News Weekly (SBS)
-    '0jG1HXr3tGoGorW1ieytRS',  # The Audio Long Read (The Guardian)
+    '0dWpNy3iA6Mm3xYaHB2Zi9',  # Wait Wait... Don't Tell Me! (NPR)
 ]
 
 # --- SPOTIFY AUTHENTICATION ---
