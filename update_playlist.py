@@ -12,7 +12,7 @@ from collections import Counter
 load_dotenv()
 
 # --- CONFIGURATION ---
-DRY_RUN = True  # Set to True to only produce log and not update playlist
+DRY_RUN = False  # Set to True to only produce log and not update playlist
 
 # Spotify playlist IDs loaded from environment variables
 DAILY_DRIVE = os.getenv('TARGET_PLAYLIST_ID')  # Destination: the playlist we're creating/updating
