@@ -52,14 +52,15 @@ WEEKDAY_BACKUPS = [
 
 # WEEKEND_BACKUPS: Kept as separate pools to avoid Saturday and Sunday drawing from the same shows.
 SATURDAY_BACKUPS = [
-    '2hmkzUtix0qTqvtpPcMzEL',  # Radiolab
-    '51CN011CgUdG7EUfm7cXF7',  # Reveal
+    '3IM0lmZxpFAY7CwMuv9H4g',  # The Daily (New York Times)
+    '20Ko99T4ZcJdGey9hltGZa',  # Democracy Sausage
+    '4c2PEjWLJ5vGUu2kjRR808',  # Post Reports (The Washington Post)
 ]
 
 SUNDAY_BACKUPS = [
+    '4FYpq3lSeQMAhqNI81O0Cn',  # Planet Money
+    '44D2RrEWMQMv9jAVDeGmuU',  # World News Weekly (SBS)
     '0jG1HXr3tGoGorW1ieytRS',  # The Audio Long Read (The Guardian)
-    '0PhoePNItwrXBnmAEZgYmt',  # Unexplainable (Vox)
-    '2VRS1IJCTn2Nlkg33ZVfkM',  # 99% Invisible
 ]
 
 # --- SPOTIFY AUTHENTICATION ---
