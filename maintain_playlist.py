@@ -30,7 +30,7 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=CLIENT_ID,
 
 
 if DRY_RUN:
-    print("🔍 Dry run — no changes will be made.\n")
+    print("DRY RUN: No changes will be made.\n")
 
 # --- LOAD TODAY'S LOG ---
 # Find the most recent log file for today (format: daily_drive_YYYY-MM-DD_HH-MM.json)
@@ -58,7 +58,6 @@ except Exception:
 # --- REPLACE IF UNPLAYABLE OR DELETED ---
 if not playable:
     latest = sp.show_episodes(show_id, limit=1, market="AU")["items"][0]
-    print(f"Replacing with: {latest['name']}")
     if not DRY_RUN:
         # Remove the dead episode and insert the replacement at the same position
         p = 0
@@ -69,7 +68,6 @@ if not playable:
     uris[0] = latest["uri"]    
     with open(f"logs/daily_drive_{timestamp}.json", "w") as f:
         json.dump(uris, f)
-    print(f"📄 Log saved: logs/daily_drive_{timestamp}.json")
 
     # Save .log file
     show_name = sp.show(show_id, market="AU")["name"]
@@ -85,6 +83,3 @@ if not playable:
             f.write(f"[{time_str}] SUCCESS: Daily Drive updated.\n")
         else:
             f.write(f"[{time_str}] DRY RUN: No changes made to Daily Drive.\n")
-
-else:
-    print(f"✅ {ep['name']} — OK")
