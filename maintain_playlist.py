@@ -69,6 +69,8 @@ if not playable:
     with open(f"logs/daily_drive_{timestamp}.json", "w") as f:
         json.dump(uris, f)
 
+    print(f"Maintentance Required. Daily Drive updated. Check {LOG_PATH} & {JSON_PATH} for the changes.")
+
     # Save .log file
     show_name = sp.show(show_id, market="AU")["name"]
     ep_name = ep["name"] if playable else episode_id
