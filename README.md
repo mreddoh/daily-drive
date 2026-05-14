@@ -8,15 +8,17 @@ This script gives you full control over the "weave" of your morning. It mixes yo
 ## ✨ Features
 - **Weaving:** Mixes news episodes with blocks of music (e.g., News -> 4 Songs -> News).
 - **Weekend Mode:** Automatically detects Saturday/Sunday and switches to a "weekend" layout using non-daily podcasts.
-- **Smart Lookback:** Only selects episodes released within a specific timeframe (e.g., the last 2 days) to ensure freshness.
-- **Robust Logging:** Generates detailed logs in a `/logs` folder, documenting every episode and track selected for the day.
+- **Podcast Recency Check:** Only selects episodes released within a specific timeframe (e.g., the last 2 days) to ensure freshness.
+- **Logging:** Generates detailed logs in a `/logs` folder, documenting every episode and track selected for the day.
 - **Frequency Checks:** Using logs in the `/logs` folder, the code checks for songs that have been played too much in a particular amount of time.
 - **Dry Run Support:** Toggle `DRY_RUN` in your `.env` to test the playlist generation without affecting your Spotify account.
 
 ## 📁 Project Structure
 ```text
 .
-├── .env                 # API Credentials and Playlist IDs (Secret)
-├── .venv/               # Python Virtual Environment
-├── logs/                # Generated execution logs
-└── update_playlist.py   # Main Python script
+├── .env                   # API Credentials and Playlist IDs (Secret)
+├── .cache                 # Spotify API cache
+├── .venv/                 # Python Virtual Environment
+├── logs/                  # Generated execution logs
+├── update_playlist.py     # Main Python script
+└── maintain_playlist.py   # Maintainence script for updating broken playlists
