@@ -50,6 +50,7 @@ WEEKDAY_BACKUPS = [
     '03arfcmwJRUVPGcOZRQJOx',  # SBS News In Depth
     '2D1BdnaZU3kB6KK8IF0RVW',  # Politics Now (ABC)
     '2cSQmzYnf6LyrN0Mi6E64p',  # Today In Focus (The Guardian)
+    '76oa1oGtoCeeCl2NOPUoNb',  # Cut Through (Crikey)
 ]
 
 # WEEKEND_BACKUPS: Kept as separate pools to avoid Saturday and Sunday drawing from the same shows.
@@ -174,13 +175,19 @@ def update_daily_drive():
     cutoff_time = (NOW_MELB - timedelta(days=days_n)).timestamp()
 
     try:
+        seen_dates = set()
         all_played_uris = []
         for filename in os.listdir(LOG_DIR):
             if filename.endswith(".json"):
                 file_path = os.path.join(LOG_DIR, filename)
                 if os.path.getmtime(file_path) >= cutoff_time:
-                    with open(file_path, 'r') as f:
-                        all_played_uris.extend(json.load(f))
+                    date = filename.split("_")[2]  # YYYY-MM-DD
+                    if date not in seen_dates:
+                        seen_dates.add(date)
+                        with open(file_path, 'r') as f:
+                            all_played_uris.extend(json.load(f))
+                    else:
+                        log_event(f"DEDUP: Skipped duplicate log for {date} | {filename}")
         
         counts = Counter(all_played_uris)
         excluded = {uri for uri, count in counts.items() if count >= threshold_x and "episode" not in uri}
