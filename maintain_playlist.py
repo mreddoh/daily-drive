@@ -61,8 +61,9 @@ if not playable:
     print(f"Replacing with: {latest['name']}")
     if not DRY_RUN:
         # Remove the dead episode and insert the replacement at the same position
-        sp.playlist_remove_specific_occurrences_of_items(DAILY_DRIVE, [{"uri": f"spotify:episode:{episode_id}"}])
-        sp.playlist_add_items(DAILY_DRIVE, [latest["uri"]])
+        p = 0
+        sp.playlist_remove_specific_occurrences_of_items(DAILY_DRIVE, [{"uri": f"spotify:episode:{episode_id}", "positions": [p]}])
+        sp.playlist_add_items(DAILY_DRIVE, [latest["uri"]], position=p)
 
     # Patch the URI list in memory and save an updated JSON log
     uris[0] = latest["uri"]    
