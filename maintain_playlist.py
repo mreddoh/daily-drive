@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # --- CONFIGURATION ---
-DRY_RUN = True  # Set to True to only produce log and not update playlist
+DRY_RUN = False  # Set to True to only produce log and not update playlist
 DAILY_DRIVE = os.getenv('TARGET_PLAYLIST_ID')  # Spotify playlist ID from .env
 SHOW_ID = "75ruL1B21lO7NXqvgdfn1Q"
 
