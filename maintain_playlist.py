@@ -39,7 +39,10 @@ with open(log_file) as f:
 episode_id = uris[0].split(":")[-1]
 
 # Try to fetch the episode — a 404 means it has been deleted from Spotify
-playable = requests.get(f"https://open.spotify.com/oembed?url=spotify:episode:{episode_id}").status_code == 200
+try:
+    playable = requests.get(f"https://open.spotify.com/oembed?url=spotify:episode:{episode_id}").status_code != 404
+except requests.exceptions.RequestException:
+    playable = True
 
 # --- REPLACE IF UNPLAYABLE OR DELETED ---
 if not playable:
